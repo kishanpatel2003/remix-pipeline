@@ -7,7 +7,7 @@ An audio-processing pipeline with persistent job state, quality checks, retries,
 Run the state and checkpoint example with Python 3.10+:
 
 ```sh
-python examples/checkpoint_demo.py
+python examples/review_checkpoint.py
 ```
 
 It advances a local job through a review checkpoint and reloads the approved state. No audio files or account setup needed.
