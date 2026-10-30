@@ -1,0 +1,114 @@
+{
+  "features": [
+    {
+      "id": "harness.state_manager",
+      "description": "State manager: read/write pipeline_state.json, enforce valid state transitions, track per-track status",
+      "phase": "harness",
+      "depends_on": [],
+      "passes": true
+    },
+    {
+      "id": "harness.error_handler",
+      "description": "Error handler: categorize failures (network/parse/validation/generation/dependency), append to pipeline_log.jsonl, track retry counts, decide retry vs escalate vs skip",
+      "phase": "harness",
+      "depends_on": ["harness.state_manager"],
+      "passes": true
+    },
+    {
+      "id": "harness.dod_validator",
+      "description": "DOD validator: per-stage validation checking output files exist and meet quality thresholds, returns pass/fail with reasons",
+      "phase": "harness",
+      "depends_on": ["harness.state_manager"],
+      "passes": true
+    },
+    {
+      "id": "harness.checkpoint_handler",
+      "description": "Checkpoint handler: log to pending_review.json, CLI for human approve/reject, orchestrator skips blocked tracks",
+      "phase": "harness",
+      "depends_on": ["harness.state_manager"],
+      "passes": true
+    },
+    {
+      "id": "harness.orchestrator",
+      "description": "Orchestrator loop: read state, select next (track_id, stage), dispatch to stage, validate DOD, transition state, handle errors, round-robin multiple tracks",
+      "phase": "harness",
+      "depends_on": [
+        "harness.state_manager",
+        "harness.error_handler",
+        "harness.dod_validator",
+        "harness.checkpoint_handler"
+      ],
+      "passes": true
+    },
+    {
+      "id": "stage.scrape_billboard",
+      "description": "Stage 1: scrape Billboard Hot 100, parse rank/title/artist, deduplicate, write tracks_manifest.json",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": true
+    },
+    {
+      "id": "stage.download_source",
+      "description": "Stage 2: search YouTube via yt-dlp, download best audio as MP3 to raw/{track_id}.mp3",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": true
+    },
+    {
+      "id": "stage.analyze_track",
+      "description": "Stage 3: extract BPM, key, structure, energy curve, chords, duration — write analysis JSON",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": true
+    },
+    {
+      "id": "stage.separate_stems",
+      "description": "Stage 4: Demucs htdemucs split into vocals/drums/bass/other WAVs, normalize to -1 dBFS",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": true
+    },
+    {
+      "id": "stage.process_vocals",
+      "description": "Stage 5: HP 80Hz, room reverb, 1/8 delay synced to BPM, extract hook section via pedalboard",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": true
+    },
+    {
+      "id": "stage.generate_instrumentation",
+      "description": "Stage 6: prompt Suno V5 via APIPASS for deep house instrumental matching analysis BPM/key/chords",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": true
+    },
+    {
+      "id": "stage.arrange_remix",
+      "description": "Stage 7: time-stretch/pitch-shift vocals, place hook at drop, layer vocals over instrumentation",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": true
+    },
+    {
+      "id": "stage.mix",
+      "description": "Stage 8: sidechain compression, EQ carving for vocals, bus compression, 24-bit 44.1kHz output",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": false
+    },
+    {
+      "id": "stage.master",
+      "description": "Stage 9: sub cleanup, multiband compression, loudness to -9 LUFS, true peak limit -0.3 dBTP, 320kbps MP3",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": false
+    },
+    {
+      "id": "stage.package_output",
+      "description": "Stage 10: bundle final MP3, metadata JSON, analysis JSON, SHA256 checksum into output/{track_id}/",
+      "phase": "stages",
+      "depends_on": ["harness.orchestrator"],
+      "passes": false
+    }
+  ]
+}

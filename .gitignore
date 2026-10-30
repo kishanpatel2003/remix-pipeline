@@ -1,0 +1,30 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.env
+demucs_check/
+separated/
+
+# Audio and output directories (keep structure, ignore contents)
+raw/*
+stems/*
+generated/*
+mixes/*
+masters/*
+output/*
+rejected/*
+analysis/*
+!*/.gitkeep
+
+# Runtime data
+data/*.json
+data/*.jsonl
+!data/.gitkeep
+
+.env.*
+!.env.example
+.DS_Store
+.pytest_cache/
+dist/
+build/

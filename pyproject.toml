@@ -1,0 +1,32 @@
+[project]
+name = "house-remix-pipeline"
+version = "0.1.0"
+description = "An experimental audio pipeline with persistent state and human review checkpoints"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "beautifulsoup4",
+    "yt-dlp",
+    "mutagen",
+    "librosa",
+    "numpy",
+    "pedalboard",
+    "pydub",
+    "soundfile",
+    "pyloudnorm",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+chords = ["essentia"]
+separation = ["demucs", "torch", "torchaudio"]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["harness*", "agents*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
