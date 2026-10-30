@@ -1,32 +1,30 @@
 # Remix Pipeline
 
-An experimental audio-processing pipeline built around persistent job state, quality gates, retries, and human review. It combines conventional audio processing with an API-backed music-generation stage.
+An audio-processing pipeline with persistent job state, quality checks, retries, and human review. Analyze tracks, separate stems, process vocals, generate instrumentation, and align a rough arrangement. Jobs can pause for approval and resume from disk.
 
-The interesting part is the execution infrastructure: a track can advance through multiple stages, pause for approval, and resume from stored state instead of restarting from scratch.
+## Getting started
 
-## Try the offline state demo
-
-Python 3.10+; no account, audio files, or third-party packages required:
+Run the state and checkpoint example with Python 3.10+:
 
 ```sh
 python examples/checkpoint_demo.py
 ```
 
-The demo creates temporary synthetic job state, pauses at a review checkpoint, approves it, and reloads the result from disk. It does not download music or call a generation API.
+It advances a local job through a review checkpoint and reloads the approved state. No audio files or account setup needed.
 
-## Implemented pieces
+## Components
 
 | Layer | Components |
 | --- | --- |
-| Execution | JSON-backed state machine, stage registry, error classification/retry accounting, validation dispatch, human checkpoint storage |
-| Audio | Tempo/key/structure analysis, Demucs stem separation, vocal processing, instrumental generation adapter, time/pitch alignment and rough arrangement |
-| Verification | Synthetic-audio tests and mocked network/subprocess tests |
+| Execution | JSON-backed state machine, stage registry, retry accounting, validation, review checkpoints |
+| Audio | Tempo/key/structure analysis, Demucs stem separation, vocal processing, instrumental generation, time/pitch alignment |
+| Tests | Generated audio fixtures and mocked network/subprocess calls |
 
-`features.json` records the implementation boundary: 12 of 15 planned components are marked implemented. Final mixing, mastering, and packaging are unfinished. Stage functions are individually callable; a complete, validated end-to-end command is not provided. Orchestrator stage mapping and audio-validator registration need integration work before a full run.
+Final mixing, mastering, and packaging are unfinished. Individual stages are callable; full orchestration still needs stage-mapping and validator integration. `features.json` tracks the remaining work.
 
 ## Development
 
-Python 3.10+ and FFmpeg are needed for the audio components. Use a virtual environment:
+Python 3.10+ and FFmpeg are needed for the audio components:
 
 ```sh
 python -m venv .venv
@@ -35,17 +33,15 @@ python -m pip install -e '.[dev]'
 python -m pytest -q
 ```
 
-Stem separation additionally requires `python -m pip install -e '.[separation]'`. Instrument generation requires an `APIPASS_KEY` supplied through the environment and can incur charges; it is not needed for the demo or mocked tests. `.env.example` documents the variable; this package does not automatically load `.env` files.
+Stem separation also requires `python -m pip install -e '.[separation]'`. For instrument generation, export `APIPASS_KEY` in your environment. See `.env.example`; `.env` files are not loaded automatically.
 
 ## Code map
 
-- `harness/`: state, validation, retry accounting, review checkpoints, and dispatch
-- `agents/`: individual audio/data stage implementations
-- `tests/`: offline fixtures, mocked integrations, and synthetic audio
-- `examples/`: a dependency-free persistent-state demo
-
-Only use audio you own or are authorized to process. No commercial tracks, stems, trained models, or API credentials are included. Third-party tools and services have their own terms and licenses.
+- `harness/`: state, validation, retries, review, and dispatch
+- `agents/`: audio and data stages
+- `tests/`: fixtures and integration checks
+- `examples/`: persistent-state example
 
 ## License
 
-MIT; see [LICENSE](LICENSE)
+[MIT](LICENSE)

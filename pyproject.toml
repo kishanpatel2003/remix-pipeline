@@ -1,7 +1,7 @@
 [project]
 name = "house-remix-pipeline"
 version = "0.1.0"
-description = "An experimental audio pipeline with persistent state and human review checkpoints"
+description = "Audio processing with persistent state and human review checkpoints"
 requires-python = ">=3.10"
 dependencies = [
     "requests",
